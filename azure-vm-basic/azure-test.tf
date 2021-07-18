@@ -14,6 +14,12 @@ variable "region" {
 variable "admin_username" {
   default = "adminuser"
 }
+variable "network_address_space" {
+  default = "10.0.0.0/16"
+}
+variable "subnet_address_space" {
+  default = "10.0.2.0/24"
+}
 
 # providers
 
@@ -45,7 +51,7 @@ resource "azurerm_virtual_network" "local" {
   name = "terraform-network"
   resource_group_name = azurerm_resource_group.local.name
   location = azurerm_resource_group.local.location
-  address_space = [ "10.0.0.0/16" ]
+  address_space = [ var.network_address_space ]
   tags = {
     "environment" = "demo"
   }
@@ -55,7 +61,7 @@ resource "azurerm_subnet" "local" {
   name                 = "terraform-subnet"
   resource_group_name  = azurerm_resource_group.local.name
   virtual_network_name = azurerm_virtual_network.local.name
-  address_prefixes     = ["10.0.2.0/24"]
+  address_prefixes     = [var.subnet_address_space]
 }
 
 resource "azurerm_public_ip" "local" {
