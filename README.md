@@ -1,14 +1,15 @@
 # Terraform playground
 
-Terraform allows representing infrastructure as code. Or kinda code ... not like F# or C#, but more like _declarative configuration files_, like `json`, `yml` etc but with some support for functions, modules, etc.
-
-The language is called `HCL` - HashiCorp Configuration Language.
+Terraform allows representing infrastructure as code. Or kinda code ... not like F# or C#, but more like _declarative configuration files_, like `json`, `yml` etc but with some support for functions, modules, etc. The language is called `HCL` - HashiCorp Configuration Language.
 
 ## What is infrastructure?
 
 It is where your app and its individual parts live - virtual machines, networks, load balancers, db servers, message queues etc. With growing popularity of cloud providers like `Azure`, there have appeared certain new resources like web app, cosmos db, storage account etc.
 
 A common way of managing infrastructure is manual intervention via some sort of GUI (all of us have at least once logged in to a production server to make a "small" change), writing custom configuration tools that setup everything specifically for your app etc. All of it can become error-prone, no one knows why a change to the environment has been made, why stuff just stopped working, which leads to hours of troubleshooting on the production servers.. fun stuff 😱
+
+With modern cloud providers, manual configuration would be for example going to `https://portal.azure.com/` and clicking through the UI to create a virtual machine:
+![Azure portal UI](images/azure-portal.png)
 
 ## Goal
 
@@ -28,25 +29,42 @@ You don't want to use GUI (or other configuration tool) to do infrastructure bec
 You want to use infrastructure as code to:
 
 - track changes to the infrastructure in `git`,
+- share and collaborate with others,
 - recreate the same environment easily many times,
 - revert changes easily if something goes wrong,
 - make changes easily,
 - automate changes to the infrastructure during deployment.
 
+You tell `terraform` what the desired state of the infrastructure is and it will make it happen.
+
 ## How it works
 
 You install `terraform` on your machine (fun fact - it is written in `Go`) and run `terraform` commands in a terminal.
 
-You tell `terraform` what state you want your environment to be in by writing your configuration in `.tf` files in some folder on your machine and `terraform` will make sure the environment is in that exact state. You run `terraform` commands in a terminal to apply changes to the configuration.
+You tell `terraform` what you want your environment to look like by writing your configuration in `.tf` files in some folder on your machine. The real state of the environment that corresponds to the configuration is tracked in a terraform state file and acts as a source of truth. When applying changes to the configuration, `terraform` will use the current state file to know what changes to make in the environment so that it matches the new configuration.
 
-Commands:
+Do not bypass `terraform` by changing your environment via GUI or elsewhere, `terraform` state file won't match the actual configuration!
 
-- `plan` - reads current state, compares to the configuration, creates a plan of changes,
+![picture 4](images/terraform-cycle.png)
+
+You run `terraform` commands in a terminal to apply changes to the configuration. Commands:
+
+- `plan` - reads current state, compares to the configuration, creates a plan of changes (preview of the actions),
 - `apply` - executed the action proposed in the plan on remote objects,
 - `destroy` - delete all remote infrastructure for the configuration.
 
-![picture 1](images/terraform-overview.png)
+![Terraform overview](images/terraform-overview.png)
 
 ## Provider
 
-`Terraform` can work with different cloud providers - `Azure`, `Amazon`, `Digital Ocean`.
+`Terraform` can work with different cloud platforms - `Azure`, `Amazon`, `Digital Ocean`, etc. Code you write will differ depending on the cloud platform, since they usually have their own resources and rules for managing infrastructure specific for that platform.
+
+`Terraform` itself is agnostic of the underlying platform, but for managing remote objects on that platform it needs to know how to interact with it - in other words how to call the platform's API to create/modify/delete resources. This is done via terraform plugins called providers.
+
+### Usage with Azure
+
+First of all, you need an `azure` subscription. You also need to install `Azure CLI` to authenticate into `azure` when running `terraform`. To login run:
+
+```bash
+az login
+```
