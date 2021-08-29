@@ -28,3 +28,7 @@ terraform apply main.tfplan
 ```
 ssh -i ~\.ssh\azure_id_rsa adminuser@51.13.101.27
 ```
+
+# OpenStack Nordlo
+
+https://registry.terraform.io/providers/terraform-provider-openstack/openstack/latest/docs
