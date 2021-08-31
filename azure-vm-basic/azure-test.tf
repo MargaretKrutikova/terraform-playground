@@ -1,13 +1,8 @@
 # variables
-variable "azure_subscription_id" {}
 
 # path to public key on the local machine
 variable "public_key_path" {}
-
-# path to private key on the local machine
-variable "private_key_path" {}
-
-# key pair that exists within azure to ssh
+variable "azure_subscription_id" {}
 variable "region" {
   default = "Norway East" 
 }
@@ -24,7 +19,7 @@ variable "subnet_address_space" {
 # providers
 
 terraform {
-   required_providers {
+  required_providers {
     azurerm = {
       source = "hashicorp/azurerm"
       version = "~>2.0"
@@ -130,38 +125,6 @@ resource "azurerm_network_interface_security_group_association" "name" {
   network_security_group_id = azurerm_network_security_group.local.id
 }
 
-# Storage account
-resource "random_id" "local" {
-  keepers = {
-    # Generate a new ID only when a new resource group is defined
-    resource_group = azurerm_resource_group.local.name
-  }
-
-  byte_length = 8
-}
-
-resource "azurerm_storage_account" "local" {
-  name                        = "diag${random_id.local.hex}"
-    resource_group_name         = azurerm_resource_group.local.name
-    location                    = azurerm_resource_group.local.location
-    account_replication_type    = "LRS"
-    account_tier                = "Standard"
-
-    tags = {
-        environment = "demo"
-    }
-}
-
-# create and display an SSH key
-# resource "tls_private_key" "local" {
-#   algorithm = "RSA"
-#   rsa_bits = 4096
-# }
-# output "tls_private_key" {
-#   value = tls_private_key.local.private_key_pem
-#   sensitive = true
-# }
-
 # VM
 resource "azurerm_linux_virtual_machine" "local" {
   name = "terraform-vm"
@@ -169,7 +132,7 @@ resource "azurerm_linux_virtual_machine" "local" {
   resource_group_name = azurerm_resource_group.local.name
   location = azurerm_resource_group.local.location
 
-  size = "Standard_D2s_v3"
+  size = "Standard_A1_v2"
   network_interface_ids = [ azurerm_network_interface.local.id ]
 
   os_disk {
@@ -193,10 +156,6 @@ resource "azurerm_linux_virtual_machine" "local" {
     public_key = file(var.public_key_path)
   }
 
-  boot_diagnostics {
-    storage_account_uri = azurerm_storage_account.local.primary_blob_endpoint
-  }
-
   # connection {
   #   type = "ssh"
   #   host = azurerm_public_ip.local.ip_address
@@ -210,7 +169,7 @@ resource "azurerm_linux_virtual_machine" "local" {
   #     "sudo service nginx start"
   #   ]
   # }
-
+  
   tags = {
     "environment" = "demo"
   }
