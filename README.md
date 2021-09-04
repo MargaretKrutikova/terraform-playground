@@ -68,3 +68,10 @@ First of all, you need an `azure` subscription. You also need to install `Azure 
 ```bash
 az login
 ```
+
+## Creating resources
+
+### Virtual machine
+
+Prepare an `ssh` key locally that will be deployed to the machine when `terraform` creates remote resources.
+
